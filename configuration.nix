@@ -24,7 +24,8 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp1s0.useDHCP = true;
+  networking.interfaces.enp3s0.useDHCP = true;
+  networking.interfaces.wlp2s0.useDHCP = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -36,18 +37,15 @@
     font = "Lat2-Terminus16";
     keyMap = "us";
   };
+  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" "zh_HK.UTF-8/UTF-8" ];
+
+  i18n.inputMethod.enabled = "fcitx";
+  i18n.inputMethod.fcitx.engines = with pkgs.fcitx-engines; [ table-extra ];
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   services.xserver.windowManager.bspwm.enable = true;
   services.xserver.displayManager.defaultSession = "none+bspwm";
-
-  # https://konfou.xyz/posts/nixos-without-display-manager/
-  # https://rycwo.dev/archive/nixos-series-004-configuring-xinit/
-
-  # services.xserver.videoDrivers = [ "qxl" ];
-  services.qemuGuest.enable = true;
-  services.spice-vdagentd.enable = true;  
 
   # Configure keymap in X11
   services.xserver.layout = "us";
@@ -63,27 +61,49 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  virtualisation.libvirtd.enable = true;
+  programs.dconf.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.daniel = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "libvirtd" ]; # Enable ‘sudo’ for the user.
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    wget
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by def
+ault.
+    wget git
     firefox
-    bspwm
-    sxhkd
-    dmenu
-    rxvt-unicode
-    spice-vdagent
-    python3
-    xorg.xinit
+    bspwm sxhkd dmenu
+    rxvt-unicode alacritty
+    python3 go jdk11
+    ntfs3g
+    nano emacs
+    ranger pcmanfm
+    p7zip htop neofetch
+    openvpn
+    virt-manager
+    fcitx fcitx-configtool fcitx-engines.extra
+    tdesktop signal-desktop
+    jq nmap wireshark sqlmap masscan nikto
   ];
 
+  fonts = {
+    fontconfig.enable = true;
+    fontDir.enable = true;
+    enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      wqy_microhei
+      wqy_zenhei
+    ];
+  };
+  
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -112,4 +132,3 @@
   system.stateVersion = "21.11"; # Did you read the comment?
 
 }
-
